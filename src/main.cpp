@@ -13,10 +13,9 @@
 #define TOPIC_PUBLISH_PRESURE "ESP32_Sensors_BME280_PRESS"
 #define ID_MQTT "ESP32_MQTT_BRANISTORMTECH"
 #define led 2
-#define SEALEVELPRESSURE_HPA (1013.25)
 
-const char *SSID = "FERNANDO MENDES";
-const char *PSWD = "213592asd";
+#define MSG_BUFFER_SIZE 50
+char msg[MSG_BUFFER_SIZE];
 
 const char *BROKER_MQTT = "broker.hivemq.com";
 int BROKER_PORT = 1883;
