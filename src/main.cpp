@@ -130,69 +130,59 @@ void mqttCallback(char* topic, byte* payload, unsigned int length){
   Serial.println(msg);     
 }
 
-void init_mqtt(void){
+void initMqtt(void){
   /* informa a qual broker e porta deve ser conectado */
   MQTT.setServer(BROKER_MQTT, BROKER_PORT); 
   /* atribui função de callback (função chamada quando qualquer informação do 
   tópico subescrito chega) */
-  MQTT.setCallback(mqtt_callback);            
+  MQTT.setCallback(mqttCallback);            
 }
 
-void verifica_conexoes_wifi_mqtt(void){
+void checkConnectionsWifiMqtt(void){
   /* se não há conexão com o WiFI, a conexão é refeita */
-  reconnect_wifi(); 
+  if (!WiFi.status() == WL_CONNECTED){
+    reconnectWifi(); 
+  }
   /* se não há conexão com o Broker, a conexão é refeita */
-  if (!MQTT.connected()) 
-    reconnect_mqtt(); 
+  if (!MQTT.connected()){
+    reconnectMqtt(); 
+  }
 } 
 
 void setup() {
-  Serial.begin(9600);
-  init_wifi();
-  init_mqtt();
+  initSerial();
+  // initBME280();
+  // initWifi();
+  WifiManager();
+  initMqtt();
   pinMode(led, OUTPUT);
-  while(!Serial);    // time to get serial running
-  Serial.println(F("BME280 test"));
-
-  unsigned status;
-  
-  status = bme.begin(0x76);
- 
-  if (!status) {
-    Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!");
-    Serial.print("SensorID was: 0x"); Serial.println(bme.sensorID(),16);
-    Serial.print("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n");
-    Serial.print("   ID of 0x56-0x58 represents a BMP 280,\n");
-    Serial.print("        ID of 0x60 represents a BME 280.\n");
-    Serial.print("        ID of 0x61 represents a BME 680.\n");
-    while (1) delay(10);
-  }
-  
-  Serial.println("-- Default Test --");
-  delayTime = 1000;
-
-  Serial.println();
 }
 
 void printValues() {
   static unsigned long currentTime = millis();
   static unsigned long currentTimeLed = millis();
+  float temperature, humidity, pressure;
   if ((millis() - currentTime) < 1){
+    temperature = 30.1;
     Serial.print("Temperature = ");
-    Serial.print(bme.readTemperature());
+    Serial.print(temperature);
     Serial.println(" °C");
+    sprintf(msg, "%f", temperature);
+    MQTT.publish(TOPIC_PUBLISH_TEMPERATURE, msg);
 
+    pressure = 945.23;
     Serial.print("Pressure = ");
-    Serial.print(bme.readPressure() / 100.0F);
+    Serial.print(pressure);
     Serial.println(" hPa");
+    sprintf(msg, "%f", pressure);
+    MQTT.publish(TOPIC_PUBLISH_PRESURE, msg);
 
-    Serial.print("Approx. Altitude = ");
-    Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
-    Serial.println(" m");
-
+    humidity = 45.4;
     Serial.print("Humidity = ");
-    Serial.print(bme.readHumidity());
+    Serial.print(humidity);
     Serial.println(" %");
+    sprintf(msg, "%f", humidity);
+    MQTT.publish(TOPIC_PUBLISH_HUMIDITY, msg);
 
     Serial.println();
   }
