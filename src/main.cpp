@@ -25,36 +25,85 @@ PubSubClient MQTT(espClient);
 
 Adafruit_BME280 bme;
 unsigned long delayTime;
-void reconnect_wifi(){
-  /* se já está conectado a rede WI-FI, nada é feito. 
-  Caso contrário, são efetuadas tentativas de conexão */
-  if (WiFi.status() == WL_CONNECTED)
-    return;
-        
-  WiFi.begin(SSID, PSWD);
-    
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(100);
-    Serial.print(".");
-  }
-  
-  Serial.println();
-  Serial.print("Conectado com sucesso na rede ");
-  Serial.print(SSID);
-  Serial.println("IP obtido: ");
-  Serial.println(WiFi.localIP());
+WiFiManager wfm;
+
+void reconnectWifi(){
+  while (1){
+    wfm.autoConnect();
+    if (WiFi.status() == WL_CONNECTED){
+      Serial.println(WiFi.SSID());
+      Serial.println(WiFi.localIP());
+      break;
+    }
+    else{
+      wfm.resetSettings();
+      if (!wfm.startConfigPortal("BrainStorm Tecnologia - IOT", "12345678")){                                      // Nome da Rede e Senha gerada pela ESP
+        Serial.println("Falha ao conectar");
+        delay(2000);
+        ESP.restart();
+      }
+      else{
+        Serial.println("Conectado na Rede!!!");
+        break;
+      }
+    }
+  }  
 }
 
-void init_wifi(void){
+// callback que indica que o ESP entrou no modo AP
+void configModeCallback(WiFiManager *myWiFiManager) {
+  Serial.println("Entrou no modo de configuração");
+  Serial.println(WiFi.softAPIP());                      // imprime o IP do AP
+  Serial.println(myWiFiManager->getConfigPortalSSID()); // imprime o SSID criado da rede
+}
+
+// Callback que indica que salvamos uma nova rede para se conectar (modo estação)
+void saveConfigCallback() {
+  Serial.println("Configuração salva");
+}
+
+void WifiManager(){
+  wfm.setAPCallback(configModeCallback);
+  wfm.setSaveConfigCallback(saveConfigCallback);
+  reconnectWifi();
+}
+
+void initBME280(){
+  Serial.println(F("BME280 test"));
+  unsigned status;
+  status = bme.begin(0x76);
+ 
+  if (!status) {
+    Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!");
+    
+    Serial.print("ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n");
+    Serial.print("ID of 0x56-0x58 represents a BMP 280,\n");
+    Serial.print("ID of 0x60 represents a BME 280.\n");
+    Serial.print("ID of 0x61 represents a BME 680.\n");
+    while (1) delay(10);
+  }
+  
+  Serial.println("-- Default Test --");
+  Serial.print("SensorID was: 0x"); 
+  Serial.println(bme.sensorID(),16);
+  Serial.println();
+}
+
+void initSerial(){
+  Serial.begin(9600);
+  while(!Serial);    // time to get serial running
+}
+
+void initWifi(void){
   delay(10);
   Serial.println("------Conexao WI-FI------");
   Serial.print("Conectando-se na rede: ");
   Serial.println(SSID);
   Serial.println("Aguarde");
-  reconnect_wifi();
+  reconnectWifi();
 }
 
-void reconnect_mqtt(void){
+void reconnectMqtt(void){
   while (!MQTT.connected()){
     Serial.print("* Tentando se conectar ao Broker MQTT: ");
     Serial.println(BROKER_MQTT);
@@ -65,12 +114,11 @@ void reconnect_mqtt(void){
     else{
       Serial.println("Falha ao reconectar no broker.");
       Serial.println("Havera nova tentatica de conexao em 2s");
-      delay(2000);
     }
   }
 }
 
-void mqtt_callback(char* topic, byte* payload, unsigned int length){
+void mqttCallback(char* topic, byte* payload, unsigned int length){
   String msg;
 
   //obtem a string do payload recebido
