@@ -5,6 +5,7 @@
 #include <Adafruit_BME280.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include <WiFiManager.h>
 
 #define TOPIC_SUBSCRIBE "ESP32_Receive_Information"
 #define TOPIC_PUBLISH "ESP32_Send_Information"
