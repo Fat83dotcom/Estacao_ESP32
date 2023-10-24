@@ -8,7 +8,9 @@
 #include <WiFiManager.h>
 
 #define TOPIC_SUBSCRIBE "ESP32_Receive_Information"
-#define TOPIC_PUBLISH "ESP32_Send_Information"
+#define TOPIC_PUBLISH_HUMIDITY "ESP32_Sensors_BME280_HUMI"
+#define TOPIC_PUBLISH_TEMPERATURE "ESP32_Sensors_BME280_TEMP"
+#define TOPIC_PUBLISH_PRESURE "ESP32_Sensors_BME280_PRESS"
 #define ID_MQTT "ESP32_MQTT_BRANISTORMTECH"
 #define led 2
 #define SEALEVELPRESSURE_HPA (1013.25)
