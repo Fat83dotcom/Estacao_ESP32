@@ -200,19 +200,11 @@ void printValues() {
   if ((millis() - currentTimeLed) > 1000){
     currentTimeLed = millis();
   }
-  
-
-  
 }
 
-void loop() {
-  /* garante funcionamento das conexões WiFi e ao broker MQTT */
-  verifica_conexoes_wifi_mqtt();
-  /* Envia frase ao broker MQTT */
-  MQTT.publish(TOPIC_PUBLISH, "ESP32 se comunicando com MQTT");
-
+void loop() { 
+  checkConnectionsWifiMqtt();
+  printValues();
   /* keep-alive da comunicação com broker MQTT */    
   MQTT.loop();
-  /* Agurda 1 segundo para próximo envio */
-  delay(1000);
 }
