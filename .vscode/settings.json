@@ -1,3 +1,12 @@
 {
-    "cmake.sourceDirectory": "/home/fernando/Documentos/PlatformIO/Projects/Estacao_ESP32/.pio/libdeps/esp32doit-devkit-v1/Adafruit BusIO"
+    "cmake.sourceDirectory": "/home/fernando/Documentos/PlatformIO/Projects/Estacao_ESP32/.pio/libdeps/esp32doit-devkit-v1/Adafruit BusIO",
+    "files.associations": {
+        "*.js": "javascript",
+        "*.c++": "cpp",
+        "*.html": "html",
+        "*.css": "css",
+        "*.py": "python",
+        "*.java": "java",
+        "random": "cpp"
+    }
 }
