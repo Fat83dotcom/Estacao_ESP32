@@ -142,11 +142,11 @@ void initSerial() {
   while(!Serial);    // time to get serial running
 }
 
-void reconnectMqtt(void) {
+void reconnectMqtt(const char *IDMqtt) {
   while (!MQTT.connected()){
     Serial.print("* Tentando se conectar ao Broker MQTT: ");
     Serial.println(BROKER_MQTT);
-    if (MQTT.connect(ID_MQTT)){
+    if (MQTT.connect(IDMqtt)){
       Serial.println("Conectado com sucesso ao broker MQTT!");
       MQTT.subscribe(TOPIC_SUBSCRIBE); 
     } 
@@ -174,14 +174,14 @@ void initMqtt(void) {
   MQTT.setServer(BROKER_MQTT, BROKER_PORT);           
 }
 
-void checkConnectionsWifiMqtt(void) {
+void checkConnectionsWifiMqtt(const char *IDMqtt) {
   /* se não há conexão com o WiFI, a conexão é refeita */
   if (WiFi.status() != WL_CONNECTED){
     reconnectWifi(); 
   }
   /* se não há conexão com o Broker, a conexão é refeita */
   if (!MQTT.connected()){
-    reconnectMqtt(); 
+    reconnectMqtt(IDMqtt); 
   }
 }
 
