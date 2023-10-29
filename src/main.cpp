@@ -1,11 +1,10 @@
 #include <Arduino.h>
-#include <cstring> 
+#include <cstring>
+#include <ArduinoJson.h>
 #include "classesAndFunctions.h"
 
-#define TOPIC_PUBLISH_MAC "ESP32_MAC_BRAIN"
-#define TOPIC_PUBLISH_HUMIDITY "ESP32_Sensors_BME280_HUMI"
-#define TOPIC_PUBLISH_TEMPERATURE "ESP32_Sensors_BME280_TEMP"
-#define TOPIC_PUBLISH_PRESURE "ESP32_Sensors_BME280_PRESS"
+
+#define TOPIC_PUBLISH_DATA "ESP32_Sensors_BME280"
 
 
 #define led 2
@@ -13,12 +12,18 @@
 char msg[MSG_BUFFER_SIZE];
 String sMac = WiFi.macAddress();
 const char *mac = sMac.c_str();
+const char *tempJson = "Temperatura";
+const char *humiJson = "Umidade";
+const char *pressureJson = "Pressao";
+const char *macJson = "IDMac";
+const char *ID_MQTT_ESP32 = concatChar("ESP32_ID_", mac);
 
 Mean temperatureMean;
 Mean pressureMean;
 Mean humidityMean;
 Counter count;
 Counter getDataSensorCounter;
+DynamicJsonDocument jsonData(JSON_OBJECT_SIZE(4));
 
 void setup() {
   initSerial();
@@ -64,30 +69,26 @@ void getSensorData() {
 
 void printValues() {
   Serial.println(count.getCounter());
+  Serial.println(ID_MQTT_ESP32);
 
-  MQTT.publish(TOPIC_PUBLISH_MAC, mac);
-  Serial.println(mac);
-
-  Serial.print("Temperature = ");
-  Serial.print(temperatureMean.getMean(count.getCounter()));
-  Serial.println(" °C");
-  sprintf(msg, "%.2f", temperatureMean.getMean(count.getCounter()));
+  jsonData[tempJson] = temperatureMean.getMean(count.getCounter());
   temperatureMean.resetSum();
-  MQTT.publish(TOPIC_PUBLISH_TEMPERATURE, msg);
 
-  Serial.print("Pressure = ");
-  Serial.print(pressureMean.getMean(count.getCounter()));
-  Serial.println(" hPa");
-  sprintf(msg, "%.2f", pressureMean.getMean(count.getCounter()));
-  pressureMean.resetSum();
-  MQTT.publish(TOPIC_PUBLISH_PRESURE, msg);
-
-  Serial.print("Humidity = ");
-  Serial.print(humidityMean.getMean(count.getCounter()));
-  Serial.println(" %");
-  sprintf(msg, "%.2f", humidityMean.getMean(count.getCounter()));
+  jsonData[humiJson] = humidityMean.getMean(count.getCounter());
   humidityMean.resetSum();
-  MQTT.publish(TOPIC_PUBLISH_HUMIDITY, msg);
+
+  jsonData[pressureJson] = pressureMean.getMean(count.getCounter());
+  pressureMean.resetSum();
+
+  jsonData[macJson] = mac;
+
+  size_t sizeMsg = measureJson(jsonData) + 1;
+  char msg[sizeMsg];
+  serializeJson(jsonData, msg, sizeMsg);
+
+  Serial.print("Data = ");
+  Serial.println(msg);
+  MQTT.publish(TOPIC_PUBLISH_DATA, msg);
   
   count.resetCounter();
   getDataSensorCounter.resetCounter();
@@ -108,7 +109,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 }
 
 void loop() { 
-  checkConnectionsWifiMqtt();
+  checkConnectionsWifiMqtt(ID_MQTT_ESP32);
   MQTT.setCallback(mqttCallback);
   getSensorData();
   MQTT.loop();
