@@ -8,10 +8,7 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 
-#define TOPIC_SUBSCRIBE "ESP32_Receive_Information"
-#define TOPIC_PUBLISH_HUMIDITY "ESP32_Sensors_BME280_HUMI"
-#define TOPIC_PUBLISH_TEMPERATURE "ESP32_Sensors_BME280_TEMP"
-#define TOPIC_PUBLISH_PRESURE "ESP32_Sensors_BME280_PRESS"
+#define TOPIC_SUBSCRIBE "Require_Data"
 #define ID_MQTT "ESP32_MQTT_BRANISTORMTECH"
 
 const char *BROKER_MQTT = "broker.hivemq.com";
@@ -24,6 +21,7 @@ unsigned long delayTime;
 WiFiManager wfm;
 
 class Mean;
+class Counter;
 void reconnectWifi();
 void configModeCallback(WiFiManager *myWiFiManager);
 void saveConfigCallback();
@@ -31,9 +29,28 @@ void WifiManager();
 void initBME280();
 void initSerial();
 void reconnectMqtt(void);
-void mqttCallback(char* topic, byte* payload, unsigned int length);
 void initMqtt(void);
 void checkConnectionsWifiMqtt(void);
+
+class Counter {
+  private:
+    float __count = 0;
+  public:
+    Counter(){}
+    ~Counter(){}
+
+    void increaseCounter() {
+      this->__count++;
+    }
+
+    void resetCounter() {
+      this->__count = 0;
+    }
+
+    float getCounter() {
+      return this->__count;
+    }
+};
 
 class Mean {
   private:
@@ -98,7 +115,7 @@ void WifiManager() {
 }
 
 void initBME280() {
-  Serial.println(F("BME280 test"));
+  Serial.println("BME280 test");
   unsigned status;
   status = bme.begin(0x76);
  
@@ -108,10 +125,13 @@ void initBME280() {
     Serial.print("ID of 0x56-0x58 represents a BMP 280,\n");
     Serial.print("ID of 0x60 represents a BME 280.\n");
     Serial.print("ID of 0x61 represents a BME 680.\n");
-    while (1) delay(10);
+    while (1) {
+      Serial.printf("Verifique o sensor BME280...");
+      delay(10);
+    } 
   }
 
-  Serial.println("-- Default Test --");
+  Serial.println("-- BME280 Test OK --");
   Serial.print("SensorID was: 0x"); 
   Serial.println(bme.sensorID(),16);
   Serial.println();
@@ -137,24 +157,21 @@ void reconnectMqtt(void) {
   }
 }
 
-void mqttCallback(char* topic, byte* payload, unsigned int length) {
-  String msg;
+// void mqttCallback(char* topic, byte* payload, unsigned int length) {
+//   String msg;
 
-  //obtem a string do payload recebido
-  for(int i = 0; i < length; i++){
-    char c = (char)payload[i];
-    msg += c;
-  }
-  Serial.print("[MQTT] Mensagem recebida: ");
-  Serial.println(msg);     
-}
+//   //obtem a string do payload recebido
+//   for(int i = 0; i < length; i++){
+//     char c = (char)payload[i];
+//     msg += c;
+//   }
+//   Serial.print("[MQTT] Mensagem recebida: ");
+//   Serial.println(msg);     
+// }
 
 void initMqtt(void) {
   /* informa a qual broker e porta deve ser conectado */
-  MQTT.setServer(BROKER_MQTT, BROKER_PORT); 
-  /* atribui função de callback (função chamada quando qualquer informação do 
-  tópico subescrito chega) */
-  MQTT.setCallback(mqttCallback);            
+  MQTT.setServer(BROKER_MQTT, BROKER_PORT);           
 }
 
 void checkConnectionsWifiMqtt(void) {
@@ -166,6 +183,6 @@ void checkConnectionsWifiMqtt(void) {
   if (!MQTT.connected()){
     reconnectMqtt(); 
   }
-} 
+}
 
 #endif
