@@ -27,9 +27,10 @@ void saveConfigCallback();
 void WifiManager();
 void initBME280();
 void initSerial();
-void reconnectMqtt(void);
+void reconnectMqtt(const char *IDMqtt);
 void initMqtt(void);
-void checkConnectionsWifiMqtt(void);
+void checkConnectionsWifiMqtt(const char *IDMqtt);
+const char* concatChar(const char *preFix, const char *mac);
 
 class Counter {
   private:
