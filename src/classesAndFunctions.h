@@ -185,4 +185,12 @@ void checkConnectionsWifiMqtt(const char *IDMqtt) {
   }
 }
 
+const char* concatChar(const char *preFix, const char *mac) {
+  int bufferSize = strlen_P(preFix) + strlen_P(mac) + 1;
+  char *ID = new char[bufferSize];
+  strcpy_P(ID, preFix);
+  strcat_P(ID, mac);
+  return ID;
+}
+
 #endif
