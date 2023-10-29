@@ -9,7 +9,6 @@
 #include <Adafruit_BME280.h>
 
 #define TOPIC_SUBSCRIBE "Require_Data"
-#define ID_MQTT "ESP32_MQTT_BRANISTORMTECH"
 
 const char *BROKER_MQTT = "broker.hivemq.com";
 int BROKER_PORT = 1883;
