@@ -10,28 +10,38 @@
 
 
 #define led 2
-#define MSG_BUFFER_SIZE 50
-char msg[MSG_BUFFER_SIZE];
+#define CHAR_BUFFER_SIZE 50
+char msg[CHAR_BUFFER_SIZE];
 String sMac = WiFi.macAddress();
 const char *mac = sMac.c_str();
-const char *tempJson = "Temperatura";
-const char *humiJson = "Umidade";
-const char *pressureJson = "Pressao";
-const char *macJson = "IDMac";
+
+DynamicJsonDocument jsonData(JSON_OBJECT_SIZE(1024));
+unsigned long dateHour = jsonData["dataHora"];
+float tempJson = jsonData["Temperatura"];
+float humiJson = jsonData["Umidade"];
+float pressureJson = jsonData["Pressao"];
+const char *macJson = jsonData["IDMac"];
 const char *ID_MQTT_ESP32 = concatChar("ESP32_ID_", mac);
 
+WiFiUDP ntpUDP;
+NTPClient ntp(ntpUDP, "a.st1.ntp.br", -10800, 1000);
 Mean temperatureMean;
 Mean pressureMean;
 Mean humidityMean;
 Counter count;
 Counter getDataSensorCounter;
-DynamicJsonDocument jsonData(JSON_OBJECT_SIZE(4));
+
+void ntpInit() {
+  ntp.begin();
+  ntp.forceUpdate();
+}
 
 void setup() {
   initSerial();
   // initBME280();
   WifiManager();
   initMqtt();
+  ntpInit();
   pinMode(led, OUTPUT);
 }
 
