@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <cstring>
+#include <string.h>
 #include <ArduinoJson.h>
+#include <NTPClient.h>
 #include "classesAndFunctions.h"
 
 
