@@ -16,7 +16,6 @@ int BROKER_PORT = 1883;
 WiFiClient espClient;
 PubSubClient MQTT(espClient);
 Adafruit_BME280 bme;
-unsigned long delayTime;
 WiFiManager wfm;
 
 class Mean;
