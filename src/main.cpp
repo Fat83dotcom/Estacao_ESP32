@@ -83,16 +83,24 @@ void printValues() {
   Serial.println(count.getCounter());
   Serial.println(ID_MQTT_ESP32);
 
-  jsonData[tempJson] = temperatureMean.getMean(count.getCounter());
+  if (ntp.forceUpdate()) {
+    unsigned long date = ntp.getEpochTime();
+    jsonData["dataHora"] = date;  
+  }
+  else {
+    jsonData["dataHora"] = "No date" ;
+  }
+  
+  jsonData["Temperatura"] = temperatureMean.getMean(count.getCounter());
   temperatureMean.resetSum();
 
-  jsonData[humiJson] = humidityMean.getMean(count.getCounter());
+  jsonData["Umidade"] = humidityMean.getMean(count.getCounter());
   humidityMean.resetSum();
 
-  jsonData[pressureJson] = pressureMean.getMean(count.getCounter());
+  jsonData["Pressao"] = pressureMean.getMean(count.getCounter());
   pressureMean.resetSum();
 
-  jsonData[macJson] = mac;
+  jsonData["IDMac"] = mac;
 
   size_t sizeMsg = measureJson(jsonData) + 1;
   char msg[sizeMsg];
