@@ -24,7 +24,7 @@ const char *macJson = jsonData["IDMac"];
 const char *ID_MQTT_ESP32 = concatChar("ESP32_ID_", mac);
 
 WiFiUDP ntpUDP;
-NTPClient ntp(ntpUDP, "a.st1.ntp.br", -10800, 1000);
+NTPClient ntp(ntpUDP, "a.st1.ntp.br");
 Mean temperatureMean;
 Mean pressureMean;
 Mean humidityMean;
