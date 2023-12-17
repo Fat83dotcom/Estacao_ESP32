@@ -85,10 +85,10 @@ void printValues() {
 
   if (ntp.forceUpdate()) {
     unsigned long date = ntp.getEpochTime();
-    jsonData["dataHora"] = date;  
+    jsonData["dataHora"] = date;
   }
   else {
-    jsonData["dataHora"] = "No date" ;
+    jsonData["dataHora"] = -1 ;
   }
   
   jsonData["Temperatura"] = temperatureMean.getMean(count.getCounter());
