@@ -63,13 +63,13 @@ void ledBlink() {
 void getSensorData() {
   float temperature, humidity, pressure;
   if (int(getDataSensorCounter.getCounter()) % 7000 == 0) {
-    temperature = 30.1F;
+    temperature = float(random(24, 35));
     temperatureMean.sum(temperature);
 
-    pressure = 945.23F;
+    pressure = float(random(930, 945));
     pressureMean.sum(pressure);
 
-    humidity = 45.4F;
+    humidity = float(random(30, 90));
     humidityMean.sum(humidity);
 
     count.increaseCounter();
