@@ -7,10 +7,14 @@
 #include <WiFiManager.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
+#include "passwords.h"
 
 #define TOPIC_SUBSCRIBE "Require_Data"
+#define TOPIC_PUBLISH_DATA "ESP32_Sensors_BME280"
 
-const char *BROKER_MQTT = "broker.hivemq.com";
+const char* BROKER_MQTT = "brokermqtt.brainstormtecnologia.tech";
+const char* mqttUsername = user; // replace with your Username
+const char* mqttPassword = password; // replace with your Password
 int BROKER_PORT = 1883;
 
 WiFiClient espClient;
@@ -26,9 +30,9 @@ void saveConfigCallback();
 void WifiManager();
 void initBME280();
 void initSerial();
-void reconnectMqtt(const char *IDMqtt);
+void reconnectMqtt(const char *IDMqtt, const char* user, const char* password);
 void initMqtt(void);
-void checkConnectionsWifiMqtt(const char *IDMqtt);
+void checkConnectionsWifiMqtt(const char *IDMqtt, const char* user, const char* password);
 const char* concatChar(const char *preFix, const char *mac);
 
 class Counter {
@@ -76,14 +80,14 @@ void reconnectWifi(){
   while (1){
     wfm.autoConnect("BrainStorm Tecnologia - IOT");
     if (WiFi.status() == WL_CONNECTED){
-      // Serial.println(WiFi.SSID());
-      // Serial.println(WiFi.localIP());
+      Serial.println(WiFi.SSID());
+      Serial.println(WiFi.localIP());
       break;
     }
     else{
       wfm.resetSettings();
       if (!wfm.startConfigPortal("BrainStorm Tecnologia - IOT", "12345678")){                                      // Nome da Rede e Senha gerada pela ESP
-        // Serial.println("Falha ao conectar");
+        Serial.println("Falha ao conectar");
         delay(2000);
         ESP.restart();
       }
@@ -97,14 +101,14 @@ void reconnectWifi(){
 
 // callback que indica que o ESP entrou no modo AP
 void configModeCallback(WiFiManager *myWiFiManager) {
-  // Serial.println("Entrou no modo de configuração");
-  // Serial.println(WiFi.softAPIP());                      // imprime o IP do AP
-  // Serial.println(myWiFiManager->getConfigPortalSSID()); // imprime o SSID criado da rede
+  Serial.println("Entrou no modo de configuração");
+  Serial.println(WiFi.softAPIP());                      // imprime o IP do AP
+  Serial.println(myWiFiManager->getConfigPortalSSID()); // imprime o SSID criado da rede
 }
 
 // Callback que indica que salvamos uma nova rede para se conectar (modo estação)
 void saveConfigCallback() {
-  // Serial.println("Configuração salva");
+  Serial.println("Configuração salva");
 }
 
 void WifiManager() {
@@ -130,10 +134,10 @@ void initBME280() {
     } 
   }
 
-  // Serial.println("-- BME280 Test OK --");
-  // Serial.print("SensorID was: 0x"); 
-  // Serial.println(bme.sensorID(),16);
-  // Serial.println();
+  Serial.println("-- BME280 Test OK --");
+  Serial.print("SensorID was: 0x"); 
+  Serial.println(bme.sensorID(),16);
+  Serial.println();
 }
 
 void initSerial() {
@@ -141,17 +145,17 @@ void initSerial() {
   while(!Serial);    // time to get serial running
 }
 
-void reconnectMqtt(const char *IDMqtt) {
+void reconnectMqtt(const char *IDMqtt, const char* user, const char* password) {
   while (!MQTT.connected()){
-    // Serial.print("* Tentando se conectar ao Broker MQTT: ");
-    // Serial.println(BROKER_MQTT);
-    if (MQTT.connect(IDMqtt)){
-      // Serial.println("Conectado com sucesso ao broker MQTT!");
+    Serial.print("* Tentando se conectar ao Broker MQTT: ");
+    Serial.println(BROKER_MQTT);
+    if (MQTT.connect(IDMqtt, user, password)){
+      Serial.println("Conectado com sucesso ao broker MQTT!");
       MQTT.subscribe(TOPIC_SUBSCRIBE); 
     } 
     else{
-      // Serial.println("Falha ao reconectar no broker.");
-      // Serial.println("Havera nova tentatica de conexao em 2s");
+      Serial.println("Falha ao reconectar no broker.");
+      Serial.println("Havera nova tentatica de conexao em 2s");
     }
   }
 }
@@ -170,17 +174,17 @@ void reconnectMqtt(const char *IDMqtt) {
 
 void initMqtt(void) {
   /* informa a qual broker e porta deve ser conectado */
-  MQTT.setServer(BROKER_MQTT, BROKER_PORT);           
+  MQTT.setServer(BROKER_MQTT, BROKER_PORT);   
 }
 
-void checkConnectionsWifiMqtt(const char *IDMqtt) {
+void checkConnectionsWifiMqtt(const char *IDMqtt, const char* user, const char* password) {
   /* se não há conexão com o WiFI, a conexão é refeita */
   if (WiFi.status() != WL_CONNECTED){
     reconnectWifi(); 
   }
   /* se não há conexão com o Broker, a conexão é refeita */
   if (!MQTT.connected()){
-    reconnectMqtt(IDMqtt); 
+    reconnectMqtt(IDMqtt, user, password); 
   }
 }
 
