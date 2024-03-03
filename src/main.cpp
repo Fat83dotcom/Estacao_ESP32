@@ -27,6 +27,8 @@ Mean pressureMean;
 Mean humidityMean;
 Counter count;
 Counter getDataSensorCounter;
+TempData tempD;
+FilterNaN fNaN;
 
 void ntpInit() {
   ntp.begin();
@@ -61,15 +63,15 @@ void getSensorData() {
   float temperature, humidity, pressure;
   if (int(getDataSensorCounter.getCounter()) % 7000 == 0) {
     // temperature = 45.6;
-    temperature = bme.readTemperature();
+    temperature = fNaN.temp_NaN(bme.readTemperature(), tempD.pt_T);
     temperatureMean.sum(temperature);
 
     // pressure = 45.9;
-    pressure = bme.readPressure() / 100.0F;
+    pressure = fNaN.press_NaN((bme.readPressure() / 100.0F), tempD.pt_P);
     pressureMean.sum(pressure);
 
     // humidity = 785.99;
-    humidity = bme.readHumidity();
+    humidity = fNaN.umi_NaN(bme.readHumidity(), tempD.pt_U);
     humidityMean.sum(humidity);
 
     count.increaseCounter();
