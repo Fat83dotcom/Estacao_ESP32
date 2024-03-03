@@ -6,9 +6,6 @@
 #include "classesAndFunctions.h"
 
 
-#define TOPIC_PUBLISH_DATA "ESP32_Sensors_BME280"
-
-
 #define led 2
 #define CHAR_BUFFER_SIZE 50
 char msg[CHAR_BUFFER_SIZE];
@@ -37,8 +34,8 @@ void ntpInit() {
 }
 
 void setup() {
-  // initSerial();
-  // initBME280();
+  initSerial();
+  initBME280(); 
   WifiManager();
   initMqtt();
   ntpInit();
@@ -63,13 +60,16 @@ void ledBlink() {
 void getSensorData() {
   float temperature, humidity, pressure;
   if (int(getDataSensorCounter.getCounter()) % 7000 == 0) {
-    temperature = float(random(24, 35));
+    // temperature = 45.6;
+    temperature = bme.readTemperature();
     temperatureMean.sum(temperature);
 
-    pressure = float(random(930, 945));
+    // pressure = 45.9;
+    pressure = bme.readPressure() / 100.0F;
     pressureMean.sum(pressure);
 
-    humidity = float(random(30, 90));
+    // humidity = 785.99;
+    humidity = bme.readHumidity();
     humidityMean.sum(humidity);
 
     count.increaseCounter();
@@ -80,8 +80,8 @@ void getSensorData() {
 }
 
 void printValues() {
-  // Serial.println(count.getCounter());
-  // Serial.println(ID_MQTT_ESP32);
+  Serial.println(count.getCounter());
+  Serial.println(ID_MQTT_ESP32);
 
   if (ntp.forceUpdate()) {
     unsigned long date = ntp.getEpochTime();
@@ -106,8 +106,8 @@ void printValues() {
   char msg[sizeMsg];
   serializeJson(jsonData, msg, sizeMsg);
 
-  // Serial.print("Data = ");
-  // Serial.println(msg);
+  Serial.print("Data = ");
+  Serial.println(msg);
   MQTT.publish(TOPIC_PUBLISH_DATA, msg);
   
   count.resetCounter();
@@ -124,12 +124,12 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   if (msg == "return") {
     const char *cMsg = msg.c_str();
     printValues();
-    // Serial.println(cMsg);
+    Serial.println(cMsg);
   }
 }
 
-void loop() { 
-  checkConnectionsWifiMqtt(ID_MQTT_ESP32);
+void loop() {
+  checkConnectionsWifiMqtt(ID_MQTT_ESP32, mqttUsername, mqttPassword);
   MQTT.setCallback(mqttCallback);
   getSensorData();
   MQTT.loop();
