@@ -22,6 +22,8 @@ PubSubClient MQTT(espClient);
 Adafruit_BME280 bme;
 WiFiManager wfm;
 
+class TempData;
+class FilterNaN;
 class Mean;
 class Counter;
 void reconnectWifi();
@@ -195,5 +197,66 @@ const char* concatChar(const char *preFix, const char *mac) {
   strcat_P(ID, mac);
   return ID;
 }
+
+class TempData{
+  private:
+  double t_Umi;
+  double t_Temp;
+  double t_Press;
+
+  public:
+  double *pt_U = &t_Umi;
+  double *pt_T = &t_Temp;
+  double *pt_P = &t_Temp;
+};
+
+class FilterNaN{
+  private:
+  double _Umidity;
+  double _Temperature;
+  double _Press;
+  int counter;
+  int laps = 1000;
+
+  public:
+  double umi_NaN (double umidity, double *pUmidity) {
+    _Umidity = umidity;
+    if (!isnan(_Umidity)) {
+      *pUmidity = _Umidity;
+    }
+    counter = 0;
+    while (isnan(_Umidity) && counter < laps){
+      _Umidity = umidity;
+      counter++;
+    }
+    return (counter == laps) ? *pUmidity : _Umidity;
+  }
+
+  double temp_NaN (double temperature, double *pTemperature) {
+    _Temperature = temperature;
+    if (!isnan(_Temperature)) {
+      *pTemperature = _Temperature;
+    }
+    counter = 0;
+    while (isnan(_Temperature) && counter < laps) {
+      _Temperature = temperature;
+      counter++;
+    }
+    return (counter == laps) ? *pTemperature : _Temperature; 
+  }
+
+  double press_NaN (double pressure, double *pPressure) {
+    _Press = pressure;
+    if (!isnan(_Press)) {
+      *pPressure = _Press;
+    }
+    counter = 0;
+    while (isnan(_Press) && counter < laps) {
+      _Press = pressure;
+      counter++;
+    }
+    return (counter == laps) ? *pPressure : _Press;
+  }
+};
 
 #endif
