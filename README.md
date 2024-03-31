@@ -163,6 +163,7 @@ void reconnectWifi(){
 * As plataformas de desenvolvimento usadas neste projeto foram:
 * [ESP32 DevKit V1](https://www.circuitstate.com/pinouts/doit-esp32-devkit-v1-wifi-development-board-pinout-diagram-and-reference/)
 * [BME280](https://makerselectronics.com/product/bme280-i2c-pressure-humidity-temperature-sensor-module)
+* [Esquema de ligação](https://i0.wp.com/randomnerdtutorials.com/wp-content/uploads/2019/06/ESP32-bme280_schematic.jpg?w=768&quality=100&strip=all&ssl=1)
 
 ## Referências bibliográficas:
 * [Protocolo MQTT](https://mqtt.org/)
