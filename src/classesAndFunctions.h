@@ -181,11 +181,11 @@ void initMqtt(void) {
 
 void checkConnectionsWifiMqtt(const char *IDMqtt, const char* user, const char* password) {
   /* se não há conexão com o WiFI, a conexão é refeita */
-  if (WiFi.status() != WL_CONNECTED){
+  while (WiFi.status() != WL_CONNECTED){
     reconnectWifi(); 
   }
   /* se não há conexão com o Broker, a conexão é refeita */
-  if (!MQTT.connected()){
+  while (!MQTT.connected()){
     reconnectMqtt(IDMqtt, user, password); 
   }
 }
