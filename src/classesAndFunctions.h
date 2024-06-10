@@ -12,7 +12,7 @@
 #define TOPIC_SUBSCRIBE "Require_Data"
 #define TOPIC_PUBLISH_DATA "ESP32_Sensors_BME280"
 
-const char* BROKER_MQTT = "brokermqtt.brainstormtecnologia.tech";
+const char* BROKER_MQTT = "brokermqtt-estacao.brainstormtech.com.br";
 const char* mqttUsername = user; // replace with your Username
 const char* mqttPassword = password; // replace with your Password
 int BROKER_PORT = 1883;
